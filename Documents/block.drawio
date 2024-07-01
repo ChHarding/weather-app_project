@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
-    <diagram id="KOi1YEAQ7PWylTglRWo0" name="Page-1">
-        <mxGraphModel dx="1199" dy="424" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram id="KOi1YEAQ7PWylTglRWo0" name="Original">
+        <mxGraphModel dx="1636" dy="1244" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -40,6 +40,53 @@
                     <mxGeometry x="290" y="380" width="170" height="170" as="geometry"/>
                 </mxCell>
                 <mxCell id="15" value="&lt;b&gt;Displays daily weather variables&lt;br&gt;&lt;/b&gt;&lt;ul&gt;&lt;li&gt;Interaction: Output&lt;/li&gt;&lt;li&gt;Data type: Array, Dataframe&lt;/li&gt;&lt;/ul&gt;" style="whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="380" width="165" height="170" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="bwYeq4-P4oz0Gs8QEX8j" name="Revised">
+        <mxGraphModel dx="1227" dy="933" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="30zM9X2UnFzQhuEnJQ_u-1" value="&lt;b&gt;Detect user's location&lt;br&gt;&lt;/b&gt;&lt;ul&gt;&lt;li&gt;Interaction: Input (user opens app) and workflow&lt;/li&gt;&lt;li&gt;Data type: Dictionary&lt;/li&gt;&lt;/ul&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="50" y="20" width="170" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-1" value="" style="html=1;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="135" y="480" as="targetPoint"/>
+                        <mxPoint x="135" y="190.00000000000023" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-2" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="270.0000000000002" as="sourcePoint"/>
+                        <mxPoint x="290" y="270.0000000000002" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-3" value="" style="endArrow=classic;html=1;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="470" as="sourcePoint"/>
+                        <mxPoint x="290" y="470" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-4" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="JbaB8SPWOShtTntiT6rn-5" target="JbaB8SPWOShtTntiT6rn-6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-5" value="&lt;b&gt;Pulls hourly weather variables&lt;br&gt;&lt;/b&gt;&lt;ul&gt;&lt;li&gt;Interaction: Workflow&lt;/li&gt;&lt;li&gt;Key data type: dictionary&lt;/li&gt;&lt;li&gt;Value data type: array&lt;/li&gt;&lt;/ul&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="180" width="170" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-6" value="&lt;b&gt;Displays in plot format&lt;br&gt;&lt;/b&gt;&lt;ul&gt;&lt;li&gt;Interaction: Output&lt;/li&gt;&lt;li&gt;Data type: Dataframe&lt;/li&gt;&lt;/ul&gt;" style="whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="565" y="180" width="165" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-7" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="JbaB8SPWOShtTntiT6rn-8" target="JbaB8SPWOShtTntiT6rn-9">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-8" value="&lt;b&gt;Pulls daily weather variables&lt;br&gt;&lt;/b&gt;&lt;ul&gt;&lt;li&gt;Interaction: Workflow&lt;/li&gt;&lt;li&gt;Key data type: dictionary&lt;/li&gt;&lt;li&gt;Value data type: array&lt;/li&gt;&lt;/ul&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;align=left;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="380" width="170" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="JbaB8SPWOShtTntiT6rn-9" value="&lt;b&gt;Displays daily weather variables&lt;br&gt;&lt;/b&gt;&lt;ul&gt;&lt;li&gt;Interaction: Output&lt;/li&gt;&lt;li&gt;Data type: Dataframe&lt;/li&gt;&lt;/ul&gt;" style="whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
                     <mxGeometry x="565" y="380" width="165" height="170" as="geometry"/>
                 </mxCell>
             </root>

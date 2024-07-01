@@ -1,0 +1,35 @@
+from tkinter import *
+import tkinter as tk
+
+#Tkinter for user to input weather variable; implement GUI as a class
+class weather_app(tk.Tk): #dervied from Tk class (main class of tkinter module)
+    def __init__(self):
+        super().__init__() #initiates attributes of parent class
+        self.title("Weather app") #title
+
+        self.variable = StringVar(self)
+        self.variable.set(" ") #default text (none)
+
+        self.label = tk.Label(self, text="Select a weather variable") #label
+        self.label.pack(pady=20)
+
+        self.option_menu = OptionMenu(self, self.variable, "Temperature", "Relative Humidity", "Precipitation Probability") #dropdown options
+        self.option_menu.pack()
+
+        #self.entry = tk.Entry(self) #user input
+        #self.entry.pack(pady=20)
+
+        self.enter_button = tk.Button(self,text="Search", command=self.start_search)
+        self.enter_button.pack(pady=20)
+    
+    def start_search(self):
+        selected_variable = self.variable.get()
+        #search_text =  self.entry.get() # Get the text from the Entry Widget
+        print("Searching...")
+
+'''
+if __name__ == "__main__":
+    app = weather_app()
+    app.mainloop()
+	'''
+
