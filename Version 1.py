@@ -94,3 +94,9 @@ print_location_info(resp)
 df = process_hourly(resp, hourly_vars)
 plot_data(df,hourly_vars)
 
+
+#plotly
+#bokeh
+#make frames, place widgets (buttons) inside
+#to create tabs, create 3 different apps, then combine into one
+#to display plot in tkinter, it has to be an image
