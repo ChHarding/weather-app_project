@@ -124,6 +124,11 @@ class weather_app(tk.Tk): #dervied from Tk class (main class of tkinter module)
     def __init__(self):
         super().__init__() #initiates attributes of parent class
         self.title("Weather app") #title
+		
+		self.var = tk.IntVar(self)
+		self.item1 = tk.Checkbutton(root, text="temperature", variable=var, command=self.search_weather)
+		self.item1.pack(anchor="w")
+
         
         # for scrolling vertically 
         self.yscrollbar = Scrollbar(self) 
@@ -154,8 +159,8 @@ class weather_app(tk.Tk): #dervied from Tk class (main class of tkinter module)
         # Attach listbox to vertical scrollbar 
         self.yscrollbar.config(command = self.listbox.yview)
 
-    def search(self):
-        #get selected weather_variables
+    def search_weather(self):
+        results =  self.weather_variables.get() #get selected weather_variables from widget
         #start with two lists: hourly and daily; or have one list and use if statement about which radio button was selected
         #build a list and if user selects hourly report, send it to process_hourly
         #if temp widget is selected, append temp to list

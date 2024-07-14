@@ -9,20 +9,18 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
-def select_variables(hourly_vars): #function to establish variables, scope, location and units of mesaurement and assign them to a single variable, params
+def select_variables(hourly_vars, daily_vars): #function to establish variables, scope, location and units of mesaurement and assign them to a single variable, params
 
 	params = {
 		"latitude": 40.6613,
 		"longitude": -73.9463,
 		"current": "temperature_2m",
 		"hourly": hourly_vars, 
-		#"daily": daily_vars, 
+		"daily": daily_vars, 
 		"temperature_unit": "fahrenheit",
 		"wind_speed_unit": "mph",
 		"timezone": "America/New_York",
-		"forecast_days": 1
+		"forecast_days": 7
 	}
 	
 	return params
@@ -42,18 +40,19 @@ def get_response(params): #sends params to API and gets back a data object (<ope
 
 	return response 
 
-def print_location_info(response): #gets whatever variable user selects; results could be shown as output in GUI
 
-	print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-	print(f"Elevation {response.Elevation()} m asl")
-	print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-	print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
-	current = response.Current()
-	current_temperature_2m = current.Variables(0).Value()
+def get_location_info(response): #gets whatever variable user selects; results could be shown as output in GUI
 
-	print(f"Current time {current.Time()}")
-	print(f"Current temperature_2m {current_temperature_2m}")
+	# Process location and get current values.
+	info = {}
+	info ["Latitude"] = response.Latitude()
+	info ["Longitude"] = response.Longitude()
+	info ["Elevation"] = response.Elevation()
+	info ["Timezone"] = response.Timezone()
+	info ["Timezone_diff"] = response.UtcOffsetSeconds()
+	
+	return info
 
 
 
@@ -78,6 +77,24 @@ def process_hourly(response, hourly_vars):
 	return hourly_dataframe
 
 
+def process_daily(response, daily_vars):
+	daily = response.Daily() 
+
+	daily_data = {"date": pd.date_range( #create keys in a dictionary
+		start = pd.to_datetime(daily.Time(), unit = "s", utc = True), #check for timezone
+		end = pd.to_datetime(daily.TimeEnd(), unit = "s", utc = True),
+		freq = pd.Timedelta(seconds = daily.Interval()),
+		inclusive = "left"
+	)}
+
+	for i in range(0, len(daily_vars)): #creates an array of daily values for variables (i) 
+		ar = daily.Variables(i).ValuesAsNumpy() 
+		key = daily_vars[i]
+		daily_data[key] = ar
+	daily_dataframe = pd.DataFrame(data = daily_data)
+	return daily_dataframe
+
+
 #Turn dataframe into a plot
 def plot_data(hourly_dataframe, hourly_var_list):
 
@@ -86,11 +103,20 @@ def plot_data(hourly_dataframe, hourly_var_list):
 							y = hourly_var_list)
 	plt.show()
 
+
+#Turn dataframe into a plot
+def plot_daily_data(daily_dataframe, daily_var_list):
+
+	p = daily_dataframe.plot(kind='line',
+							x = 'date',
+							y = daily_var_list)
+	plt.show()
+
 #Test
 hourly_vars = ["temperature_2m", "relative_humidity_2m"]
 p = select_variables(hourly_vars)
 resp = get_response(p)
-print_location_info(resp)
+get_location_info(resp)
 df = process_hourly(resp, hourly_vars)
 plot_data(df,hourly_vars)
 
