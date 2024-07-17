@@ -1,0 +1,221 @@
+#Import and install the following 
+import openmeteo_requests #%pip install openmeteo-requests
+import requests_cache #%pip install requests-cache retry-requests numpy pandas
+import pandas as pd #%pip install ipympl
+from retry_requests import retry
+import matplotlib.pyplot as plt #necessary to plot data
+import sys 
+
+import numpy as np
+import matplotlib.pyplot as plt
+from tkinter import *
+import tkinter as tk
+
+def select_hourly_variables(hourly_vars, latitude, longitude): #function to establish variables, scope, location and units of mesaurement and assign them to a single variable, params
+
+	params = {
+		"latitude": 40.6613,
+		"longitude": -73.9463,
+		"hourly": hourly_vars, 
+		"temperature_unit": "fahrenheit",
+		"wind_speed_unit": "mph",
+		"timezone": "America/New_York",
+		"forecast_days": 7
+	}
+	
+	return params
+
+def select_daily_variables(daily_vars, latitude, longitude): #function to establish variables, scope, location and units of mesaurement and assign them to a single variable, params
+
+	params = {
+		"latitude": 40.6613,
+		"longitude": -73.9463,
+		"daily": daily_vars, 
+		"temperature_unit": "fahrenheit",
+		"wind_speed_unit": "mph",
+		"timezone": "America/New_York",
+		"forecast_days": 7
+	}
+	
+	return params
+
+def get_response(params): #sends params to API and gets back a data object (<openmeteo_sdk.WeatherApiResponse.WeatherApiResponse object at 0x14738ce50>)
+
+	# More setup
+	# Setup the Open-Meteo API client with cache and retry on error
+	cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
+	retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
+	openmeteo = openmeteo_requests.Client(session = retry_session)
+
+	url = "https://api.open-meteo.com/v1/forecast"
+	
+	responses = openmeteo.weather_api(url, params=params) #returns list of data objects
+	response = responses[0] #gets single response from list 
+
+	return response 
+
+def get_location_info(response): #gets whatever variable user selects; results could be shown as output in GUI
+
+	# Process location and get current values.
+	info = {}
+	info ["Latitude"] = response.Latitude()
+	info ["Longitude"] = response.Longitude()
+	info ["Elevation"] = response.Elevation()
+	info ["Timezone"] = response.Timezone()
+	info ["Timezone_diff"] = response.UtcOffsetSeconds()
+	
+	return info
+
+# Process hourly data and feed into an array
+
+def process_hourly(response, hourly_vars):
+	hourly = response.Hourly() 
+
+	hourly_data = {"date": pd.date_range( #create keys in a dictionary
+		start = pd.to_datetime(hourly.Time(), unit = "s", utc = True), #check for timezone
+		end = pd.to_datetime(hourly.TimeEnd(), unit = "s", utc = True),
+		freq = pd.Timedelta(seconds = hourly.Interval()),
+		inclusive = "left"
+	)}
+
+	for i in range(0, len(hourly_vars)): #creates an array of hourly values for variables (i) 
+		ar = hourly.Variables(i).ValuesAsNumpy() 
+		key = hourly_vars[i]
+		hourly_data[key] = ar
+
+	hourly_dataframe = pd.DataFrame(data = hourly_data)
+	return hourly_dataframe
+
+def process_daily(response, daily_vars):
+	daily = response.Daily() 
+
+	daily_data = {"date": pd.date_range( #create keys in a dictionary
+		start = pd.to_datetime(daily.Time(), unit = "s", utc = True), #check for timezone
+		end = pd.to_datetime(daily.TimeEnd(), unit = "s", utc = True),
+		freq = pd.Timedelta(seconds = daily.Interval()),
+		inclusive = "left"
+	)}
+
+	for i in range(0, len(daily_vars)): #creates an array of daily values for variables (i) 
+		ar = daily.Variables(i).ValuesAsNumpy() 
+		key = daily_vars[i]
+		daily_data[key] = ar
+	daily_dataframe = pd.DataFrame(data = daily_data)
+	return daily_dataframe
+
+#Turn dataframe into a plot
+def plot_hourly_data(hourly_dataframe, hourly_var_list):
+
+	p = hourly_dataframe.plot(kind='line',
+							x = 'date',
+							y = hourly_var_list)
+	plt.show()
+	
+#Turn dataframe into a plot
+def plot_daily_data(daily_dataframe, daily_var_list):
+
+	p = daily_dataframe.plot(kind='line',
+							x = 'date',
+							y = daily_var_list)
+	plt.show()
+
+#Tkinter for user to input weather variable; implement GUI as a class
+class weather_app(tk.Tk): #dervied from Tk class (main class of tkinter module)
+    def __init__(self):
+        super().__init__() #initiates attributes of parent classdef __init__(self):
+        #self.initializeUI()
+        self.title("Weather app")
+        self.minsize(300, 200)  # width, height
+        self.geometry("350x500+50+50")
+        self.setupWindow()
+
+    def setupWindow(self): #Set up the widgets.
+        title = Label(self, text="Customize your weather report",
+            font=('Helvetica', 20), bd=10)
+        title.grid(row=0, column=0, columnspan=2, pady=10)
+
+        line = ttk.Separator(self, orient=HORIZONTAL)
+        line.grid(row=1, column=0, columnspan=2, sticky='ew', pady=5)
+
+        order_label = Label(self, text="Choose your variables", bd=10)
+        order_label.grid(row=2, column=0, columnspan=2, pady=10)
+
+         # Create a frame to hold the checkbuttons
+        checkbox_frame = Frame(self)
+        checkbox_frame.grid(row=3, column=0, columnspan=2)
+
+        weather_variable_list = ["temperature", "feels like", "rain", "chance of rain", "showers", "snowfall", "wind speed", "wind direction", "sunrise (daily only)", "sunset (daily only)", "UV index (daily only)", "visibility (hourly only)", "humidity (hourly only)", "dewpoint (hourly only)"]
+        self.var_dict = {}
+
+        # Populate the dictionary with checkbutton widgets and arrage them in a grid
+        for  i, weather_var in  enumerate(weather_variable_list):
+
+            # Set the text for each checkbutton
+            self.var_dict[weather_var] = Checkbutton(checkbox_frame, text=weather_var)
+
+            # Create a new instance of IntVar() for each checkbutton
+            self.var_dict[weather_var].var = IntVar()
+
+            # Set the variable parameter of the checkbutton
+            self.var_dict[weather_var]['variable'] = self.var_dict[weather_var].var
+
+            # Arrange the checkbutton in the window
+            self.var_dict[weather_var].grid(row=i//2, column=i % 2, sticky='w')
+
+        scope_label = Label(checkbox_frame, text="Choose your time range", bd=10)
+        scope_label.grid(row=(len(weather_variable_list)//2) + 2, column=0, columnspan=2, pady=10)
+
+        # Create integer variable
+        self.var = IntVar()
+        self.var.set(0)  # Use set() initialize the variable
+        self.ranges = ["hourly report", "daily summary"]
+
+        for  i, range in  enumerate(self.ranges):
+            self.rngs = Radiobutton(checkbox_frame, text=range, variable=self.var, value=i)
+            self.rngs.grid(row=(len(weather_variable_list)//2) + 3 + i, column=0, sticky='w')
+
+        # Use ttk to add styling to button
+        style = ttk.Style()
+        style.configure('TButton', bg='skyblue', fg='white')
+
+        # Create button that will call the range to display text and close the program
+        search_button = ttk.Button(self, text="Search", command=self.search_weather)
+        search_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+    def search_weather(self):
+        #use if statement to determine range and create list of selected variables that reflects hourly or daily
+        results =  self.var.get() 
+        if self.ranges == "hourly report": 
+            hourly_vars = [] 
+            hourly_vars.append(results)
+        else:
+            daily_vars = []
+            daily_vars.append(results)
+
+        #send list to process_hourly or process_daily
+'''
+        # get lat long via location lookup basd on GUI
+		p = select_hourly_variables(hourly_vars, lat, long)
+		resp = get_response(p)
+		hf = process_hourly(resp, hourly_vars)
+		plot_hourly_data(hf, hourly_vars)
+		else:
+		
+        daily_vars = []
+         #create 2 checkbox groups, you can have callback for every checkbox
+        resp = get_response(p)
+        get_location_info(resp)
+        hf = process_hourly(resp, hourly_vars)
+        df = process_daily(resp, daily_vars)
+        print(df)
+        plot_hourly_data(hf, hourly_vars)
+        plot_daily_data(df, daily_vars)
+'''
+
+
+if  __name__  ==  "__main__":
+    app = weather_app()
+    app.mainloop()
+
+
+
