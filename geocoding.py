@@ -17,7 +17,7 @@ def get_lat_long(address): # "Marengo, Iowa, USA"
         return None, None
 
 # Example usage
-address = "Marengo, Iowa, USA"
+address = "Springfield"
 lat, lon = get_lat_long(address)
 
 # Print the result
