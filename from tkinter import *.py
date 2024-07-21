@@ -10,7 +10,6 @@ import openmeteo_requests # pip install openmeteo-requests
 import requests_cache # pip install requests-cache 
 from retry_requests import retry # pip install retry-requests 
 
-
 class  weather_app(Tk):
 
     def __init__(self):
@@ -48,13 +47,14 @@ class  weather_app(Tk):
         # Populate the dictionary with checkbutton widgets and arrange them in a grid
         for  i, weather_var in  enumerate(self.weather_variable_list):
 
-            # Create a new instance of IntVar()
+            #Create an instance of IntVar()
             var = IntVar()
-            var.set(0)  # Use set() initialize the variable
+            var.set(0)
 
-            # We don't actually need to store the checkbutton widgets themselves
+            #Set text for each checkbutton and arrange in window
             Checkbutton(checkbox_frame, text=weather_var, variable=var).grid(row=i//2, column=i % 2, sticky='w')
-            # only store the IntVar instances that represent the state of the checkbutton
+
+            #Store IntVar instances that represent the state of the checkbutton
             self.checkbox_state[weather_var] = var
 
         scope_label = Label(checkbox_frame, text="Choose your time range", bd=10)
@@ -77,19 +77,21 @@ class  weather_app(Tk):
         search_button = ttk.Button(self, text="Search", command=self.search_weather)
         search_button.grid(row=6, column=0, columnspan=2, pady=10)
 
-        # Add labels for displaying the plot
+        # Add a labels for displaying the plot
         self.hourly_plot = Label(self)
         self.hourly_plot.grid(row=7, column=0, columnspan=2, pady=5)
         self.daily_plot = Label(self)
         self.daily_plot.grid(row=8, column=0, columnspan=2, pady=5)
+
+        # Process hourly data and feed into an array
 
     def process_hourly(self, response, hourly_vars):
         hourly = response.Hourly() 
         tz_corr = response.UtcOffsetSeconds()
 
         hourly_data = {"date": pd.date_range( #create keys in a dictionary
-            start = pd.to_datetime(hourly.Time() - tz_corr, unit="s", utc=True),
-            end = pd.to_datetime(hourly.TimeEnd() - tz_corr, unit="s", utc=True),
+            start = pd.to_datetime(hourly.Time() - tz_corr, unit = "s", utc = True), #check for timezone
+            end = pd.to_datetime(hourly.TimeEnd()- tz_corr, unit = "s", utc = True),
             freq = pd.Timedelta(seconds = hourly.Interval()),
             inclusive = "left"
         )}
@@ -102,13 +104,13 @@ class  weather_app(Tk):
         hourly_dataframe = pd.DataFrame(data = hourly_data)
         return hourly_dataframe
 
+
     def process_daily(response, daily_vars):
         daily = response.Daily() 
-        tz_str = response.Timezone()
 
         daily_data = {"date": pd.date_range( #create keys in a dictionary
-            start = pd.to_datetime(daily.Time(), unit="s", utc=True).tz_convert(tz_str),
-            end = pd.to_datetime(daily.TimeEnd(), uni="s", utc=True).tz_convert(tz_str),
+            start = pd.to_datetime(daily.Time(), unit = "s", utc = True), #check for timezone
+            end = pd.to_datetime(daily.TimeEnd(), unit = "s", utc = True),
             freq = pd.Timedelta(seconds = daily.Interval()),
             inclusive = "left"
         )}
@@ -117,8 +119,9 @@ class  weather_app(Tk):
             ar = daily.Variables(i).ValuesAsNumpy() 
             key = daily_vars[i]
             daily_data[key] = ar
-        daily_dataframe = pd.DataFrame(data=daily_data)
+        daily_dataframe = pd.DataFrame(data = daily_data)
         return daily_dataframe
+
 
     def get_lat_long(self, address): # "Marengo, Iowa, USA"
         # URL encode the address
@@ -140,55 +143,52 @@ class  weather_app(Tk):
         hourly_vars = [] 
         daily_vars = []
 
-        # TODO: bail out if we don't have a location or no weather variables are selected
+        #bail out if we don't have a location or not weather variables are selected
 
         for w in self.weather_variable_list:
-            if self.checkbox_state[w].get() == 1:  # get state for this weather var
-                if self.time_mode.get() == 0:  # if "hourly" was selected (indicated by 0)
-                    if w in ["sunrise (daily only)", "sunset (daily only)", "UV index (daily only)"]:
-                        continue # skip those
-                    hourly_vars.append(w)
-                else:  # if "daily" was selected
-                    if w in ["visibility (hourly only)", "humidity (hourly only)", "dewpoint (hourly only)"]:
-                        continue
-                    daily_vars.append(w)
 
+            if self.checkbox_state[w].get() == 1: #get on or off state from weather variable
+                if self.time.mode.get() == 0: #if "hourly" was selected (indicated by 0)
+                            if w in ["sunrise (daily only)", "sunset(daily only)", "UV index (daily only)"]:
+                                 continue #skip those variables
+                            hourly_vars.append(w) #place all selected variables in the hourly_vars list
+                else: #if "daily" was selected (indicated by 1)
+                        if w in ["visibility (houly only)", "humidity (hourly only)", "dewpoint (hourly only)"]:
+                             continue
+                        daily_vars.append(w)
 
-        # convert weather_variable_list to strings that Openmeteo uses
-        openmeteo_vars = {
-            "temperature": "temperature_2m",
-            "feels like": "apparent_temperature",
-            "rain": "precipitation",
-            "chance of rain": "precipitation_probability",
-            "showers": "showers",
-            "snowfall": "snowfall",
-            "wind speed": "wind_speed_10m",
-            "wind direction": "wind_direction_10m",
-            "sunrise (daily only)": "sunrise",
-            "sunset (daily only)": "sunset",
-            "UV index (daily only)": "uv_index",
-            "visibility (hourly only)": "visibility",
-            "humidity (hourly only)": "relative_humidity_2m",
-            "dewpoint (hourly only)": "dewpoint_2m"
-        }
-    
-        # convert hourly_vars to strings that Openmeteo uses
+        #convert weather_variable_list to strings that Openmeteo uses
+                        openmeteo_vars = {"temperature":"temperature_2m", 
+                                          "feels like": "apparent_temperature", 
+                                          "rain": "precipitation", 
+                                          "chance of rain": "precipitation probability", 
+                                          "showers": "showers", 
+                                          "snowfall": "snowfall", 
+                                          "wind speed": "wind_speed_10m", 
+                                          "wind direction": "wind_direction_10m", 
+                                          "sunrise (daily only)": "sunrise", 
+                                          "sunset (daily only)": "sunset", 
+                                          "UV index (daily only)":"ux_index", 
+                                          "visibility (hourly only)": "visibility", 
+                                          "humidity (hourly only)": "relative_humidity_2m", 
+                                          "dewpoint (hourly only)": "dewpoint_2m"
+                                          }
+        #convert hourly_vars to strings that Openmeteo uses
         hourly_vars = [openmeteo_vars[w] for w in hourly_vars]
-
-        # convert daily_vars to strings that Openmeteo uses
+        
+        #convert daily_vars to strings that Openmeteo uses
         #daily_vars = [openmeteo_vars[w] for w in daily_vars]
 
-
-        # Get the location from the entry widget
+        #get the location from the entry widget
         location = self.entry.get()
-        # Get the latitude and longitude
-        lat, long = self.get_lat_long(location) # will be strings!
+        #get the latitude and longitude 
+        lat, long= self.entry.get(location)
 
         tf = TimezoneFinder()
-        # Find the timezone
+        #find the timezone
         timezone = tf.timezone_at(lat=float(lat), lng=float(long))
 
-        # assemble the parameters for the Open-Meteo API
+        #assemble the parameters for the OpenMeteo API
         params = {
             "latitude": lat,
             "longitude": long,
@@ -196,11 +196,12 @@ class  weather_app(Tk):
             #"daily": daily_vars, 
             "temperature_unit": "fahrenheit",
             "wind_speed_unit": "mph",
-            "timezone": timezone,
+            "timezone": timezone
             "forecast_days": 7
-        }
+	    }
 
-        # Setup the Open-Meteo API client with cache and retry on error
+        #Setup the Open-Meteo API client with cache and retry on error
+
         cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
         retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
         openmeteo = openmeteo_requests.Client(session = retry_session)
@@ -211,48 +212,32 @@ class  weather_app(Tk):
             responses = openmeteo.weather_api(url, params=params) #returns list of data objects
             response = responses[0] #gets single response from list 
         except Exception as e:
-            print(f"Error: {e}")
-            return
-
-        # store location data - maybe useful later?
+             print(f"Error: {e}")
+             return
+        
+        #Store location data
         self.location_info = {}
-        self.location_info["Latitude"] = response.Latitude()
-        self.location_info["Longitude"] = response.Longitude()
-        self.location_info["Elevation"] = response.Elevation()
-        self.location_info["Timezone"] = response.Timezone()
-        self.location_info["Timezone_diff"] = response.UtcOffsetSeconds()
+        self.location_info ["Latitude"] = response.Latitude()
+        self.location_info ["Longitude"] = response.Longitude()
+        self.location_info ["Elevation"] = response.Elevation()
+        self.location_info ["Timezone"] = response.Timezone()
+        self.location_info ["Timezone_diff"] = response.UtcOffsetSeconds()
 
         self.hf = None
         self.df = None
-
-        # create dataframes
+        
+        #create dataframe
         if len(hourly_vars) > 0:
-            hf = self.process_hourly(response, hourly_vars)
+             hf = self.process_hourly(response, hourly_vars)
         #if len(daily_vars) > 0:
-        #   df = self.process_daily(response, daily_vars)
-
-        # show plots of data  
+             #hf = self.process_daily(response, daily_vars)
+        
+        #show plots of data
         if hf is not None:
             p = hf.plot(kind='line',
 							x = 'date',
 							y = hourly_vars)
-            plt.show()    
-
-        '''
-        if df is not None:
-            #Turn dataframe into a plot
-
-	        p = dfe.plot(kind='line',
-							x = 'date',
-							y = daily_var_list)
-	        plt.show()
-        '''
-	
-
-
-
-
-                
+            plt.show()
 
       
 
