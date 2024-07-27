@@ -4,7 +4,9 @@ HCI 584 project
 ## Setup ##
 
 ### API ###
-Weather-App uses Open-Meteo, which is an open source API and doesn’t require a key.
+Weather-App uses the following open source APIs, neither of which require a key:
+- [Open-Meteo](https://open-meteo.com/)
+- [Nominatim](https://nominatim.org/release-docs/latest/)
 
 ### Packages ###
 You’ll need to install the following code packages before running this app:
