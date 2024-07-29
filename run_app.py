@@ -68,7 +68,7 @@ class weather_app(Tk):
         self.daily_plot = Label(self)
         self.daily_plot.grid(row=8, column=0, columnspan=2, pady=5)
 
-    def process_hourly(self, response, hourly_vars): #takes hourly_vars list, feeds into an array then returns a dataframe
+    def process_hourly(self, response, hourly_vars): #sets date range (24 hours), populates date range with variables, then returns the data as a dataframe.
         hourly = response.Hourly()
         tz_corr = response.UtcOffsetSeconds()
 
@@ -87,7 +87,7 @@ class weather_app(Tk):
         hourly_dataframe = pd.DataFrame(data=hourly_data)
         return hourly_dataframe
 
-    def process_daily(self, response, daily_vars): #takes daily_vars list, feeds into an array then returns a dataframe
+    def process_daily(self, response, daily_vars): #sets date range (7 days), populates date range with variables, then returns the data as a dataframe.
         daily = response.Daily()
         tz_str = response.Timezone()
 
@@ -145,7 +145,7 @@ class weather_app(Tk):
             messagebox.showerror("Error", "Please select at least one weather variable.")
             return
 
-        #convert weather_variable_list to strings that Openmeteo uses
+        #Convert weather_variable_list to strings that Openmeteo uses. Openmeteo has different variables depending on if they're hourly or daily, so we need two different dictionaries.
         hourly_mappings = {
             "temperature": "temperature_2m",
             "feels like": "apparent_temperature",
@@ -174,7 +174,8 @@ class weather_app(Tk):
             "UV index (daily only)": "uv_index_max"
         }
 
-        if self.time_mode.get() == 0:  # Hourly report
+        #checks whether the user has selected an hourly report or a daily summary and convert the selected weather variables to the correct API parameters based on the selected time range.
+        if self.time_mode.get() == 0:  # hourly report
             selected_vars = [hourly_mappings[w] for w in hourly_vars]
             params = {
                 "latitude": lat,
@@ -185,7 +186,7 @@ class weather_app(Tk):
                 "timezone": TimezoneFinder().timezone_at(lat=float(lat), lng=float(long)),
                 "forecast_days": 1
             }
-        else:  # Daily summary
+        else:  # daily summary
             selected_vars = [daily_mappings[w] for w in daily_vars]
             selected_vars = [item for sublist in selected_vars for item in (sublist if isinstance(sublist, list) else [sublist])]
             params = {
@@ -197,6 +198,8 @@ class weather_app(Tk):
                 "timezone": TimezoneFinder().timezone_at(lat=float(lat), lng=float(long)),
                 "forecast_days": 7
             }
+
+        #TODO figure out why app serves an error when 'daily summary' is selected
 
         #sets up the Open-Meteo API client with cache and retry on error
         cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
