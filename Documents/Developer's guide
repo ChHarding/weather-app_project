@@ -1,0 +1,39 @@
+# jollian_project
+HCI 584 project
+
+## Overview ##
+Weather app allows users to find out aspects of the weather on an hourly and daily basis. A user inputs their city or ZIP code, requests metrics and gets back answers on a plot.
+
+## Installing the app ##
+You’ll need to install the following code packages before running this app:
+1. openmeteo-requests
+2. Requests-cache 
+3. retry-requests 
+4. numpy pandas
+5. ipympl
+6. timezonefinder
+
+## Flow ##
+### User interaction ###
+1. Enter the name of your city or ZIP code
+2. Select the weather variable(s) you'd like to get the forecast on
+3. Choose whether you'd like an hourly report or daily summary
+4. Select **Search**
+
+### Backend ###
+1. Once a user hits **Search**, the app runs its process_hourly and process_daily functions. The function creates a date range based on the start and ends times (hourly report or daily summary), populates date range with variables, then returns the data as a dataframe.
+2. Next, the app takes the location a user entered and feeds it to the Nominatim API, which returns the latitude and longitude. This function is called get_lat_long
+3. Last, by way of the function, search_weather, the app searches the weather with the data the user inputted using the Open Meteo API.
+  - First it catches any errors like missing input, invalid location, etc. 
+  - Then it iterates over all the variables and adds the ones that were selected to a list
+  - It converts selected variables into the strings that OpenMeteo uses, then sends to the API.
+  - It also sends along the timezone, found using TimezoneFinder, and the user's latitude and longitude
+  - Open Meteo takes all this data, determines the values, puts them in a dataframe and plots them.
+
+## Bugs to be aware of ##
+- The app serves an error when a user selects **daily summary**
+- When you select **Search**, two windows pop up: figure 1 is empty, figure 2 will have your plot
+
+## Future work ##
+If I had more time, I would disable variables that weren't applicable to the time frame that was selected. For example, if **hourly report** were selected, I would disable the sunrise, sunset and UV index variables.
+
