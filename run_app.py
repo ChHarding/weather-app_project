@@ -146,7 +146,7 @@ class weather_app(Tk):
             return
 
         #convert weather_variable_list to strings that Openmeteo uses
-        openmeteo_vars = {
+        hourly_mappings = {
             "temperature": "temperature_2m",
             "feels like": "apparent_temperature",
             "rain": "precipitation",
@@ -155,33 +155,48 @@ class weather_app(Tk):
             "snowfall": "snowfall",
             "wind speed": "wind_speed_10m",
             "wind direction": "wind_direction_10m",
-            "sunrise (daily only)": "sunrise",
-            "sunset (daily only)": "sunset",
-            "UV index (daily only)": "uv_index",
             "visibility (hourly only)": "visibility",
             "humidity (hourly only)": "relative_humidity_2m",
             "dewpoint (hourly only)": "dewpoint_2m"
         }
 
-        #convert hourly or daily vars list to strings that Openmeteo uses
-        hourly_vars = [openmeteo_vars[w] for w in hourly_vars]
-        daily_vars = [openmeteo_vars[w] for w in daily_vars]
-
-        #finds timezone
-        tf = TimezoneFinder()
-        timezone = tf.timezone_at(lat=float(lat), lng=float(long))
-
-        #assembles parameters for the Open-Meteo API
-        params = {
-            "latitude": lat,
-            "longitude": long,
-            "hourly": hourly_vars,
-            "daily": daily_vars,
-            "temperature_unit": "fahrenheit",
-            "wind_speed_unit": "mph",
-            "timezone": timezone,
-            "forecast_days": 7
+        daily_mappings = {
+            "temperature": ["temperature_2m_max", "temperature_2m_min"],
+            "feels like": "apparent_temperature_max",
+            "rain": "precipitation_sum",
+            "chance of rain": "precipitation_probability_mean",
+            "showers": "showers_sum",
+            "snowfall": "snowfall_sum",
+            "wind speed": "windspeed_10m_max",
+            "wind direction": "winddirection_10m_dominant",
+            "sunrise (daily only)": "sunrise",
+            "sunset (daily only)": "sunset",
+            "UV index (daily only)": "uv_index_max"
         }
+
+        if self.time_mode.get() == 0:  # Hourly report
+            selected_vars = [hourly_mappings[w] for w in hourly_vars]
+            params = {
+                "latitude": lat,
+                "longitude": long,
+                "hourly": selected_vars,
+                "temperature_unit": "fahrenheit",
+                "wind_speed_unit": "mph",
+                "timezone": TimezoneFinder().timezone_at(lat=float(lat), lng=float(long)),
+                "forecast_days": 1
+            }
+        else:  # Daily summary
+            selected_vars = [daily_mappings[w] for w in daily_vars]
+            selected_vars = [item for sublist in selected_vars for item in (sublist if isinstance(sublist, list) else [sublist])]
+            params = {
+                "latitude": lat,
+                "longitude": long,
+                "daily": selected_vars,
+                "temperature_unit": "fahrenheit",
+                "wind_speed_unit": "mph",
+                "timezone": TimezoneFinder().timezone_at(lat=float(lat), lng=float(long)),
+                "forecast_days": 7
+            }
 
         #sets up the Open-Meteo API client with cache and retry on error
         cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
