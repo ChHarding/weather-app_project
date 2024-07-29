@@ -1,14 +1,15 @@
 from tkinter import *
 from tkinter import ttk, messagebox
-import pandas as pd #%pip install ipympl
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
 from urllib.parse import quote_plus
 from timezonefinder import TimezoneFinder #%pip install timezonefinder
-import openmeteo_requests #%pip install openmeteo-requests
-import requests_cache #%pip install requests-cache retry-requests numpy pandas
+import openmeteo_requests #pip install openmeteo-requests
+import requests_cache #pip install requests-cache retry-requests numpy pandas
 from retry_requests import retry # pip install retry-requests 
+import pytz # pip install pytz
 
 class weather_app(Tk): 
     def __init__(self): #Here we're setting up the user interface of weather_app
@@ -91,13 +92,18 @@ class weather_app(Tk):
         daily = response.Daily()
         tz_str = response.Timezone()
 
+        try:
+            timezone = pytz.timezone(tz_str)
+        except pytz.UnknownTimeZoneError:
+            print(f"Unknown timezone: {tz_str}")
+            timezone = pytz.UTC  # Default to UTC or handle as needed
+
         daily_data = {"date": pd.date_range( #create keys in a dictionary
-            start=pd.to_datetime(daily.Time(), unit="s", utc=True).tz_convert(tz_str), #check for timezone
-            end=pd.to_datetime(daily.TimeEnd(), unit="s", utc=True).tz_convert(tz_str),
+            start=pd.to_datetime(daily.Time(), unit="s", utc=True).tz_convert(timezone), #check for timezone
+            end=pd.to_datetime(daily.TimeEnd(), unit="s", utc=True).tz_convert(timezone),
             freq=pd.Timedelta(seconds=daily.Interval()),
             inclusive="left"
         )}
-
         for i in range(0, len(daily_vars)): #iterates over variables and creates an array 
             ar = daily.Variables(i).ValuesAsNumpy()
             key = daily_vars[i]
@@ -228,15 +234,17 @@ class weather_app(Tk):
             hf = self.process_hourly(response, hourly_vars)
         if len(daily_vars) > 0:
             df = self.process_daily(response, daily_vars)
+                
+        # Create a single figure
+        fig, ax = plt.subplots()
 
         if hf is not None:
-            plt.figure()
-            hf.plot(kind='line', x='date', y=hourly_vars)
+            hf.plot(kind='line', x='date', y=hourly_vars, ax=ax)
             plt.show()
 
         if df is not None:
-            plt.figure()
-            df.plot(kind='line', x='date', y=daily_vars)
+            ax.clear()  # Clear the current axes
+            df.plot(kind='line', x='date', y=daily_vars, ax=ax)
             plt.show()
 
 if __name__ == "__main__":
