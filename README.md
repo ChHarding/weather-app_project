@@ -28,7 +28,8 @@ You’ll need to install the following code packages before running this app:
 5. Choose whether you'd like an hourly report or daily summary
 <br><img width="399" alt="Screenshot 2024-07-27 at 2 12 23 PM" src="https://github.com/user-attachments/assets/8bfde770-5e13-4dd8-889c-478eca93ffc5"><br>
 6. Select **Search**
-<br> <img width="636" alt="Screenshot 2024-07-27 at 2 12 36 PM" src="https://github.com/user-attachments/assets/09170b2b-5517-4ebb-9f61-013e1dc20f75"><br>
+<br><img width="638" alt="Screenshot 2024-07-29 at 4 03 06 PM" src="https://github.com/user-attachments/assets/2ec41ded-33e1-4acf-9a30-7dbccbb9edfc">
+<br>
    
  ### Error prevention ###
 Make sure that you don't select a variable that's incompatible with the time range you've selected. Note that some variables are compatible only with hourly or daily.
