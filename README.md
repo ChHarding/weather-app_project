@@ -1,4 +1,4 @@
-# jollian_project
+# Weather app project
 HCI 584 project
 
 ## Setup ##
@@ -10,12 +10,16 @@ Weather-App uses the following open source APIs, neither of which require a key:
 
 ### Packages ###
 You’ll need to install the following code packages before running this app:
-1. openmeteo-requests
-2. Requests-cache 
-3. retry-requests 
-4. numpy pandas
-5. ipympl
-6. timezonefinder
+- from tkinter import ttk, messagebox
+- import pandas as pd  # pip install pandas
+- import matplotlib.pyplot as plt  # pip install matplotlib
+- import numpy as np  # pip install numpy
+- import requests  # pip install requests
+- from urllib.parse import quote_plus
+- from timezonefinder import TimezoneFinder  # pip install timezonefinder
+- import openmeteo_requests  # pip install openmeteo-requests
+- import requests_cache  # pip install requests-cache
+- from retry_requests import retry  # pip install retry-requests
 
 ## Walkthrough ##
 
